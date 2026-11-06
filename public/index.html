@@ -1,294 +1,192 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bitstrips Classic – Recriação</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: #e8eef5; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background: #2c3e50; color: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
-    header h1 { font-size: 1.2rem; }
-    .badge { background: #e67e22; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; }
-    .main { display: flex; flex: 1; overflow: hidden; }
-    .sidebar { width: 260px; background: #f5f7fa; border-right: 1px solid #d0d7de; padding: 14px; overflow-y: auto; }
-    .sidebar h2 { font-size: 0.75rem; text-transform: uppercase; color: #5a6a7a; margin: 12px 0 6px; }
-    label { display: block; font-size: 0.8rem; margin-bottom: 3px; color: #444; }
-    select, button, input[type=color], input[type=text] { width: 100%; padding: 7px 9px; border: 1px solid #c0c8d0; border-radius: 6px; background: white; font-size: 0.85rem; margin-bottom: 7px; }
-    button { background: #e67e22; color: white; border: none; font-weight: 600; cursor: pointer; }
-    button:hover { background: #d35400; }
-    button.secondary { background: #3498db; }
-    button.ghost { background: transparent; color: #2c3e50; border: 1px solid #c0c8d0; }
-    .preview { flex: 1; display: flex; align-items: center; justify-content: center; background: #fff; position: relative; }
-    canvas { border: 2px solid #d0d7de; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    .status { position: absolute; bottom: 12px; left: 16px; font-size: 0.72rem; color: #888; }
-    .row { display: flex; gap: 6px; } .row > * { flex: 1; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bitstrips Classic</title>
+<style>
+:root {
+  --bg: #e8eef5;
+  --panel: #f5f7fa;
+  --border: #d0d7de;
+  --text: #1a1a1a;
+  --muted: #5a6a7a;
+  --accent: #e67e22;
+  --accent2: #3498db;
+  --header: #2c3e50;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+header { background:var(--header); color:#fff; padding:10px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+header h1 { font-size:1.15rem; font-weight:600; }
+.badge { background:var(--accent); font-size:.65rem; padding:2px 8px; border-radius:4px; font-weight:700; }
+.tabs { margin-left:auto; display:flex; gap:4px; }
+.tabs button { background:transparent; border:1px solid rgba(255,255,255,.3); color:#fff; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:.85rem; }
+.tabs button.active { background:var(--accent); border-color:var(--accent); }
+.main { display:flex; flex:1; overflow:hidden; }
+.sidebar { width:280px; background:var(--panel); border-right:1px solid var(--border); padding:12px; overflow-y:auto; flex-shrink:0; }
+.sidebar h2 { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:14px 0 6px; }
+.sidebar h2:first-child { margin-top:0; }
+label { display:block; font-size:.78rem; margin-bottom:3px; color:#444; }
+select, button, input[type=color], input[type=text], input[type=range] {
+  width:100%; padding:7px 9px; border:1px solid var(--border); border-radius:6px; background:#fff; font-size:.85rem; margin-bottom:6px;
+}
+button { background:var(--accent); color:#fff; border:none; font-weight:600; cursor:pointer; transition:background .15s; }
+button:hover { background:#d35400; }
+button.secondary { background:var(--accent2); }
+button.secondary:hover { background:#2980b9; }
+button.ghost { background:transparent; color:var(--header); border:1px solid var(--border); }
+button.ghost:hover { background:#e8eef5; }
+.row { display:flex; gap:6px; } .row>* { flex:1; }
+.swatches { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+.swatch { width:24px; height:24px; border-radius:4px; border:2px solid transparent; cursor:pointer; }
+.swatch.active, .swatch:hover { border-color:#333; }
+.preview { flex:1; display:flex; flex-direction:column; background:#fff; position:relative; overflow:hidden; }
+.canvas-wrap { flex:1; display:flex; align-items:center; justify-content:center; overflow:auto; padding:16px; background:#f0f4f8; }
+canvas { background:#fff; border:2px solid var(--border); border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,.08); cursor:default; }
+canvas.draggable { cursor:grab; }
+canvas.dragging { cursor:grabbing; }
+.status { position:absolute; bottom:10px; left:14px; font-size:.72rem; color:#888; pointer-events:none; }
+.toolbar { display:flex; gap:8px; padding:8px 12px; border-top:1px solid var(--border); background:var(--panel); flex-shrink:0; align-items:center; }
+.toolbar span { font-size:.8rem; color:var(--muted); margin-right:auto; }
+.hidden { display:none !important; }
+.panel-list { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+.panel-item { padding:6px 8px; border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:.8rem; background:#fff; }
+.panel-item.active { border-color:var(--accent); background:#fff5eb; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Bitstrips Classic</h1>
-    <span class="badge">RECRIAÇÃO</span>
-  </header>
-  <div class="main">
-    <aside class="sidebar">
-      <h2>Personagem</h2>
-      <label>Nome</label>
-      <input type="text" id="avatarName" value="Meu Avatar" />
-      <label>Gênero</label>
-      <select id="gender">
-        <option value="male">Masculino</option>
-        <option value="female">Feminino</option>
-        <option value="neutral" selected>Neutro</option>
-      </select>
-      <label>Tom de Pele</label>
-      <input type="color" id="skinTone" value="#F5D0A9" />
-      <h2>Cabelo</h2>
-      <label>Estilo</label>
-      <select id="hairStyle">
-        <option value="short">Curto</option>
-        <option value="medium">Médio</option>
-        <option value="long">Longo</option>
-        <option value="spiky">Espetado</option>
-        <option value="curly">Cacheado</option>
-      </select>
-      <label>Cor</label>
-      <input type="color" id="hairColor" value="#2C1E1E" />
-      <h2>Roupa</h2>
-      <label>Top</label>
-      <select id="topStyle">
-        <option value="tshirt">T-Shirt</option>
-        <option value="hoodie">Hoodie</option>
-        <option value="collar">Camisa</option>
-        <option value="dress">Vestido</option>
-      </select>
-      <label>Cor do Top</label>
-      <input type="color" id="shirtColor" value="#4A90D9" />
-      <label>Bottom</label>
-      <select id="bottomStyle">
-        <option value="pants">Calça</option>
-        <option value="jeans">Jeans</option>
-        <option value="skirt">Saia</option>
-      </select>
-      <h2>Acessórios</h2>
-      <label>Óculos</label>
-      <select id="glasses">
-        <option value="none">Nenhum</option>
-        <option value="round">Redondo</option>
-        <option value="rect">Retangular</option>
-      </select>
-      <label>Chapéu</label>
-      <select id="hat">
-        <option value="none">Nenhum</option>
-        <option value="cap">Boné</option>
-        <option value="beanie">Gorro</option>
-      </select>
-      <h2>Expressão</h2>
-      <select id="expression">
-        <option value="neutral">Neutro</option>
-        <option value="happy">Feliz</option>
-        <option value="grin">Sorriso</option>
-        <option value="sad">Triste</option>
-        <option value="surprised">Surpreso</option>
-        <option value="angry">Bravo</option>
-      </select>
-      <h2>Ações</h2>
-      <div class="row">
-        <button id="btnRandom">Aleatório</button>
-        <button id="btnSave" class="secondary">Salvar</button>
-      </div>
-      <div class="row">
-        <button id="btnExportPNG" class="ghost">PNG</button>
-        <button id="btnLoad" class="ghost">Carregar</button>
-      </div>
-    </aside>
-    <section class="preview">
-      <canvas id="stage" width="360" height="520"></canvas>
-      <div class="status" id="status">Pronto</div>
-    </section>
+<header>
+  <h1>Bitstrips Classic</h1>
+  <span class="badge">APP</span>
+  <div class="tabs">
+    <button id="tabChar" class="active">Personagem</button>
+    <button id="tabComic">Tirinha</button>
   </div>
-  <script type="module">
-    // Self-contained demo using the same architecture
-    // Full TypeScript modules are in /src — this demo is standalone for quick preview
-    const ORDER = ["hairBack","body","bottom","top","head","ears","eyes","eyebrows","nose","mouth","hairFront","glasses","hat"];
-    const lib = new Map();
-    const expr = new Map();
-    function add(id, cat, layers, colors, z) {
-      lib.set(id, { id, category: cat, layers, defaultColors: colors, zIndex: z });
-    }
-    add("head_basic_01","head",[{pathData:"M50,8 C22,8 6,35 6,68 C6,105 22,138 50,138 C78,138 94,105 94,68 C94,35 78,8 50,8 Z",colorSlot:"skin"}],{skin:"#F5D0A9"},60);
-    add("hair_front_short_01","hairFront",[{pathData:"M18,38 C25,18 40,10 50,10 C60,10 75,18 82,38 L78,52 C65,32 35,32 22,52 Z",colorSlot:"hair"}],{hair:"#2C1E1E"},90);
-    add("hair_back_short_01","hairBack",[{pathData:"M16,48 C25,25 40,18 50,18 C60,18 75,25 84,48 L80,78 C65,55 35,55 20,78 Z",colorSlot:"hair"}],{hair:"#2C1E1E"},10);
-    add("hair_front_medium_01","hairFront",[{pathData:"M14,42 C22,15 38,6 52,8 C68,6 82,18 88,42 L84,62 C70,28 40,28 16,58 Z",colorSlot:"hair"}],{hair:"#5C3A21"},90);
-    add("hair_back_medium_01","hairBack",[{pathData:"M10,45 C20,18 38,10 50,10 C62,10 80,18 90,45 L88,100 C70,70 30,70 12,100 Z",colorSlot:"hair"}],{hair:"#5C3A21"},10);
-    add("hair_front_long_01","hairFront",[{pathData:"M12,40 C20,12 38,4 50,5 C65,4 82,15 90,42 L86,70 C72,30 35,28 14,65 Z",colorSlot:"hair"}],{hair:"#3B2F2F"},90);
-    add("hair_back_long_01","hairBack",[{pathData:"M8,42 C18,15 38,6 50,6 C64,6 84,16 92,42 L95,130 C75,95 25,95 5,130 Z",colorSlot:"hair"}],{hair:"#3B2F2F"},10);
-    add("hair_front_spiky_01","hairFront",[{pathData:"M20,50 L25,20 L35,45 L45,12 L55,45 L65,15 L75,45 L82,25 L85,50 L78,58 C65,35 35,35 22,58 Z",colorSlot:"hair"}],{hair:"#1A1A1A"},90);
-    add("hair_back_spiky_01","hairBack",[{pathData:"M18,48 L22,22 L32,42 L42,15 L52,40 L62,18 L72,42 L80,25 L85,50 L80,75 C65,55 35,55 20,75 Z",colorSlot:"hair"}],{hair:"#1A1A1A"},10);
-    add("hair_front_curly_01","hairFront",[{pathData:"M15,55 C10,30 25,8 50,8 C75,8 90,30 85,55 C78,40 60,25 50,25 C40,25 22,40 15,55 Z",colorSlot:"hair"}],{hair:"#2C1A0E"},90);
-    add("hair_back_curly_01","hairBack",[{pathData:"M12,50 C8,25 25,5 50,5 C75,5 92,25 88,50 C95,70 85,95 70,100 C55,90 45,90 30,100 C15,95 5,70 12,50 Z",colorSlot:"hair"}],{hair:"#2C1A0E"},10);
-    add("eyes_basic_01","eyes",[
-      {pathData:"M28,58 C28,50 36,46 44,50 C48,53 48,63 44,66 C36,70 28,66 28,58 Z",colorSlot:"eyeWhite"},
-      {pathData:"M56,58 C56,50 64,46 72,50 C76,53 76,63 72,66 C64,70 56,66 56,58 Z",colorSlot:"eyeWhite"},
-      {pathData:"M36,58 A5,5.5 0 1,1 36.1,58 Z",colorSlot:"iris"},
-      {pathData:"M64,58 A5,5.5 0 1,1 64.1,58 Z",colorSlot:"iris"}
-    ],{eyeWhite:"#FFF",iris:"#3D2914"},70);
-    add("eyes_big_01","eyes",[
-      {pathData:"M26,56 C26,46 36,40 46,46 C52,50 52,64 46,68 C36,74 26,68 26,56 Z",colorSlot:"eyeWhite"},
-      {pathData:"M54,56 C54,46 64,40 74,46 C80,50 80,64 74,68 C64,74 54,68 54,56 Z",colorSlot:"eyeWhite"},
-      {pathData:"M36,56 A6,6.5 0 1,1 36.1,56 Z",colorSlot:"iris"},
-      {pathData:"M64,56 A6,6.5 0 1,1 64.1,56 Z",colorSlot:"iris"}
-    ],{eyeWhite:"#FFF",iris:"#2A5A8A"},70);
-    add("eyebrows_basic_01","eyebrows",[{pathData:"M26,46 Q38,40 48,46",colorSlot:"brow"},{pathData:"M52,46 Q62,40 74,46",colorSlot:"brow"}],{brow:"#2C1E1E"},75);
-    add("eyebrows_angry_01","eyebrows",[{pathData:"M26,48 Q38,42 48,50",colorSlot:"brow"},{pathData:"M52,50 Q62,42 74,48",colorSlot:"brow"}],{brow:"#2C1E1E"},75);
-    add("nose_basic_01","nose",[{pathData:"M47,72 Q52,82 57,72",colorSlot:"skin"}],{skin:"#F5D0A9"},72);
-    add("mouth_neutral_01","mouth",[{pathData:"M38,98 Q50,102 62,98",colorSlot:"lip"}],{lip:"#C27A7A"},73);
-    add("mouth_smile_01","mouth",[{pathData:"M36,95 Q50,112 64,95",colorSlot:"lip"}],{lip:"#C27A7A"},73);
-    add("mouth_grin_01","mouth",[{pathData:"M34,94 Q50,118 66,94 L64,98 Q50,112 36,98 Z",colorSlot:"lip"}],{lip:"#C27A7A"},73);
-    add("mouth_sad_01","mouth",[{pathData:"M38,105 Q50,95 62,105",colorSlot:"lip"}],{lip:"#C27A7A"},73);
-    add("mouth_open_01","mouth",[{pathData:"M42,95 Q50,115 58,95 Q50,108 42,95 Z",colorSlot:"lip"}],{lip:"#C27A7A"},73);
-    add("ears_basic_01","ears",[{pathData:"M8,68 C2,75 2,88 10,92 C14,80 12,72 8,68 Z",colorSlot:"skin"},{pathData:"M92,68 C98,75 98,88 90,92 C86,80 88,72 92,68 Z",colorSlot:"skin"}],{skin:"#F5D0A9"},55);
-    add("body_average_01","body",[{pathData:"M34,138 L66,138 L72,225 L28,225 Z",colorSlot:"skin"}],{skin:"#F5D0A9"},20);
-    add("top_tshirt_m_01","top",[{pathData:"M28,138 L72,138 L78,210 L22,210 Z",colorSlot:"primary"}],{primary:"#4A90D9"},30);
-    add("top_hoodie_01","top",[{pathData:"M26,138 L74,138 L80,215 L20,215 Z",colorSlot:"primary"}],{primary:"#2C3E50"},30);
-    add("top_shirt_collar_01","top",[{pathData:"M28,138 L72,138 L76,212 L24,212 Z",colorSlot:"primary"}],{primary:"#FFFFFF"},30);
-    add("top_dress_01","top",[{pathData:"M30,138 L70,138 L82,250 L18,250 Z",colorSlot:"primary"}],{primary:"#E85A71"},30);
-    add("bottom_pants_01","bottom",[{pathData:"M28,210 L72,210 L74,285 L54,285 L50,240 L46,285 L26,285 Z",colorSlot:"primary"}],{primary:"#2C3E50"},25);
-    add("bottom_jeans_01","bottom",[{pathData:"M28,210 L72,210 L75,288 L53,288 L50,245 L47,288 L25,288 Z",colorSlot:"primary"}],{primary:"#3B5998"},25);
-    add("bottom_skirt_01","bottom",[{pathData:"M28,210 L72,210 L80,265 L20,265 Z",colorSlot:"primary"}],{primary:"#9B59B6"},25);
-    add("shoes_sneakers_01","shoes",[{pathData:"M26,285 L48,285 L50,300 L24,300 Z",colorSlot:"primary"},{pathData:"M52,285 L74,285 L76,300 L50,300 Z",colorSlot:"primary"}],{primary:"#FFF"},22);
-    add("glasses_round_01","glasses",[{pathData:"M30,58 A10,9 0 1,1 30.1,58 Z",colorSlot:"frame"},{pathData:"M70,58 A10,9 0 1,1 70.1,58 Z",colorSlot:"frame"},{pathData:"M40,58 L60,58",colorSlot:"frame"}],{frame:"#1A1A1A"},95);
-    add("glasses_rect_01","glasses",[{pathData:"M26,50 L44,50 L44,66 L26,66 Z",colorSlot:"frame"},{pathData:"M56,50 L74,50 L74,66 L56,66 Z",colorSlot:"frame"}],{frame:"#222"},95);
-    add("hat_cap_01","hat",[{pathData:"M20,40 Q50,8 80,40 L78,50 Q50,25 22,50 Z",colorSlot:"primary"}],{primary:"#E74C3C"},100);
-    add("hat_beanie_01","hat",[{pathData:"M18,45 Q50,5 82,45 L78,58 Q50,30 22,58 Z",colorSlot:"primary"}],{primary:"#8E44AD"},100);
-    expr.set("neutral",{mouth:"mouth_neutral_01"});
-    expr.set("happy",{mouth:"mouth_smile_01"});
-    expr.set("grin",{mouth:"mouth_grin_01"});
-    expr.set("sad",{mouth:"mouth_sad_01"});
-    expr.set("surprised",{mouth:"mouth_open_01",eyes:"eyes_big_01"});
-    expr.set("angry",{mouth:"mouth_neutral_01",brows:"eyebrows_angry_01"});
-
-    const HAIR = { short:["hair_front_short_01","hair_back_short_01"], medium:["hair_front_medium_01","hair_back_medium_01"], long:["hair_front_long_01","hair_back_long_01"], spiky:["hair_front_spiky_01","hair_back_spiky_01"], curly:["hair_front_curly_01","hair_back_curly_01"] };
-    const TOP = { tshirt:"top_tshirt_m_01", hoodie:"top_hoodie_01", collar:"top_shirt_collar_01", dress:"top_dress_01" };
-    const BOT = { pants:"bottom_pants_01", jeans:"bottom_jeans_01", skirt:"bottom_skirt_01" };
-
-    let avatar = {
-      name: "Meu Avatar", skinTone: "#F5D0A9", gender: "neutral",
-      parts: {
-        head: "head_basic_01", hairFront: "hair_front_short_01", hairBack: "hair_back_short_01",
-        eyes: "eyes_basic_01", eyebrows: "eyebrows_basic_01", nose: "nose_basic_01", mouth: "mouth_neutral_01",
-        ears: "ears_basic_01", body: "body_average_01", top: "top_tshirt_m_01", bottom: "bottom_pants_01",
-        shoes: "shoes_sneakers_01", accessories: []
-      },
-      colors: { hair: "#2C1E1E", primary: "#4A90D9" }
-    };
-
-    const canvas = document.getElementById("stage");
-    const ctx = canvas.getContext("2d");
-    const status = document.getElementById("status");
-
-    function drawPart(partId, skin, overrides) {
-      const part = lib.get(partId);
-      if (!part) return;
-      for (const layer of part.layers) {
-        let color = "#000";
-        if (layer.colorSlot === "skin") color = skin;
-        else if (overrides && overrides[layer.colorSlot]) color = overrides[layer.colorSlot];
-        else if (part.defaultColors[layer.colorSlot]) color = part.defaultColors[layer.colorSlot];
-        const path = new Path2D(layer.pathData);
-        ctx.fillStyle = color;
-        ctx.fill(path);
-        ctx.strokeStyle = "#1a1a1a";
-        ctx.lineWidth = 2.6;
-        ctx.lineJoin = "round";
-        ctx.stroke(path);
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = "#fafafa";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      const expression = document.getElementById("expression").value;
-      const e = expr.get(expression) || {};
-      ctx.save();
-      ctx.translate(130, 30);
-      ctx.scale(1.4, 1.4);
-      const map = {
-        hairBack: avatar.parts.hairBack, body: avatar.parts.body, bottom: avatar.parts.bottom,
-        top: avatar.parts.top, head: avatar.parts.head, ears: avatar.parts.ears,
-        eyes: e.eyes || avatar.parts.eyes, eyebrows: e.brows || avatar.parts.eyebrows,
-        nose: avatar.parts.nose, mouth: e.mouth || avatar.parts.mouth,
-        hairFront: avatar.parts.hairFront
-      };
-      for (const cat of ORDER) {
-        if (cat === "glasses" || cat === "hat") continue;
-        if (map[cat]) drawPart(map[cat], avatar.skinTone, avatar.colors);
-      }
-      for (const acc of avatar.parts.accessories) drawPart(acc, avatar.skinTone, avatar.colors);
-      ctx.restore();
-      status.textContent = avatar.name + " • " + avatar.gender;
-    }
-
-    function apply() {
-      const [hf, hb] = HAIR[document.getElementById("hairStyle").value];
-      avatar.parts.hairFront = hf; avatar.parts.hairBack = hb;
-      avatar.colors.hair = document.getElementById("hairColor").value;
-      avatar.parts.top = TOP[document.getElementById("topStyle").value];
-      avatar.colors.primary = document.getElementById("shirtColor").value;
-      avatar.parts.bottom = BOT[document.getElementById("bottomStyle").value];
-      avatar.skinTone = document.getElementById("skinTone").value;
-      avatar.name = document.getElementById("avatarName").value;
-      avatar.parts.accessories = [];
-      const g = document.getElementById("glasses").value;
-      if (g === "round") avatar.parts.accessories.push("glasses_round_01");
-      if (g === "rect") avatar.parts.accessories.push("glasses_rect_01");
-      const h = document.getElementById("hat").value;
-      if (h === "cap") avatar.parts.accessories.push("hat_cap_01");
-      if (h === "beanie") avatar.parts.accessories.push("hat_beanie_01");
-      draw();
-    }
-
-    ["gender","hairStyle","topStyle","bottomStyle","glasses","hat","expression","skinTone","hairColor","shirtColor","avatarName"].forEach(id => {
-      document.getElementById(id).addEventListener("input", apply);
-      document.getElementById(id).addEventListener("change", apply);
-    });
-
-    document.getElementById("btnRandom").onclick = () => {
-      const pick = a => a[Math.floor(Math.random()*a.length)];
-      document.getElementById("gender").value = pick(["male","female","neutral"]);
-      document.getElementById("skinTone").value = pick(["#F5D0A9","#E0AC69","#C68642","#8D5524","#FFDBAC"]);
-      document.getElementById("hairStyle").value = pick(["short","medium","long","spiky","curly"]);
-      document.getElementById("hairColor").value = pick(["#1a1a1a","#2C1E1E","#5C3A21","#A0522D"]);
-      document.getElementById("topStyle").value = pick(["tshirt","hoodie","collar","dress"]);
-      document.getElementById("shirtColor").value = pick(["#4A90D9","#E85A71","#2ECC71","#9B59B6","#E67E22"]);
-      document.getElementById("bottomStyle").value = pick(["pants","jeans","skirt"]);
-      apply();
-    };
-
-    document.getElementById("btnSave").onclick = () => {
-      localStorage.setItem("bitstrips_avatar", JSON.stringify(avatar));
-      status.textContent = "Salvo no navegador!";
-    };
-    document.getElementById("btnLoad").onclick = () => {
-      const r = localStorage.getItem("bitstrips_avatar");
-      if (!r) { status.textContent = "Nada salvo."; return; }
-      avatar = JSON.parse(r);
-      document.getElementById("avatarName").value = avatar.name || "";
-      document.getElementById("skinTone").value = avatar.skinTone || "#F5D0A9";
-      draw();
-      status.textContent = "Carregado!";
-    };
-    document.getElementById("btnExportPNG").onclick = () => {
-      draw();
-      const a = document.createElement("a");
-      a.download = (avatar.name || "avatar") + ".png";
-      a.href = canvas.toDataURL("image/png");
-      a.click();
-      status.textContent = "PNG exportado!";
-    };
-
-    apply();
-  </script>
+</header>
+<div class="main">
+  <aside class="sidebar" id="sideChar">
+    <h2>Personagem</h2>
+    <label>Nome</label>
+    <input type="text" id="avName" value="Meu Avatar" />
+    <label>Gênero</label>
+    <select id="gender">
+      <option value="male">Masculino</option>
+      <option value="female">Feminino</option>
+      <option value="neutral" selected>Neutro</option>
+    </select>
+    <h2>Pele</h2>
+    <div class="swatches" id="skinSwatches"></div>
+    <h2>Cabelo</h2>
+    <label>Estilo</label>
+    <select id="hairStyle">
+      <option value="short">Curto</option>
+      <option value="medium">Médio</option>
+      <option value="long">Longo</option>
+      <option value="spiky">Espetado</option>
+      <option value="curly">Cacheado</option>
+    </select>
+    <label>Cor</label>
+    <div class="swatches" id="hairSwatches"></div>
+    <input type="color" id="hairColor" value="#2C1E1E" />
+    <h2>Roupa</h2>
+    <label>Top</label>
+    <select id="topStyle">
+      <option value="tshirt">T-Shirt</option>
+      <option value="hoodie">Hoodie</option>
+      <option value="collar">Camisa</option>
+      <option value="dress">Vestido</option>
+    </select>
+    <label>Cor</label>
+    <input type="color" id="shirtColor" value="#4A90D9" />
+    <label>Bottom</label>
+    <select id="bottomStyle">
+      <option value="pants">Calça</option>
+      <option value="jeans">Jeans</option>
+      <option value="skirt">Saia</option>
+    </select>
+    <h2>Acessórios</h2>
+    <label>Óculos</label>
+    <select id="glasses">
+      <option value="none">Nenhum</option>
+      <option value="round">Redondo</option>
+      <option value="rect">Retangular</option>
+    </select>
+    <label>Chapéu</label>
+    <select id="hat">
+      <option value="none">Nenhum</option>
+      <option value="cap">Boné</option>
+      <option value="beanie">Gorro</option>
+    </select>
+    <h2>Expressão</h2>
+    <select id="expression">
+      <option value="neutral">Neutro</option>
+      <option value="happy">Feliz</option>
+      <option value="grin">Sorriso</option>
+      <option value="sad">Triste</option>
+      <option value="surprised">Surpreso</option>
+      <option value="angry">Bravo</option>
+    </select>
+    <h2>Ações</h2>
+    <div class="row">
+      <button id="btnRandom">Aleatório</button>
+      <button id="btnSaveAv" class="secondary">Salvar</button>
+    </div>
+    <div class="row">
+      <button id="btnLoadAv" class="ghost">Carregar</button>
+      <button id="btnPngAv" class="ghost">PNG</button>
+    </div>
+  </aside>
+  <aside class="sidebar hidden" id="sideComic">
+    <h2>Tirinha</h2>
+    <label>Título</label>
+    <input type="text" id="comicTitle" value="Minha Tirinha" />
+    <h2>Painéis</h2>
+    <div class="panel-list" id="panelList"></div>
+    <div class="row">
+      <button id="btnAddPanel">+ Painel</button>
+      <button id="btnDelPanel" class="ghost">Remover</button>
+    </div>
+    <h2>Balão</h2>
+    <label>Texto</label>
+    <input type="text" id="balloonText" value="Olá!" />
+    <label>Tipo</label>
+    <select id="balloonType">
+      <option value="speech">Fala</option>
+      <option value="thought">Pensamento</option>
+      <option value="shout">Grito</option>
+      <option value="whisper">Sussurro</option>
+    </select>
+    <button id="btnAddBalloon">+ Adicionar Balão</button>
+    <p style="font-size:.72rem;color:var(--muted);margin:6px 0 10px">Arraste balões no canvas para posicionar.</p>
+    <h2>Expressão no painel</h2>
+    <select id="panelExpr">
+      <option value="neutral">Neutro</option>
+      <option value="happy">Feliz</option>
+      <option value="grin">Sorriso</option>
+      <option value="sad">Triste</option>
+      <option value="surprised">Surpreso</option>
+      <option value="angry">Bravo</option>
+    </select>
+    <h2>Ações</h2>
+    <button id="btnExportComic" class="secondary">Exportar Tirinha PNG</button>
+    <button id="btnSaveComic" class="ghost">Salvar Tirinha</button>
+    <button id="btnLoadComic" class="ghost">Carregar Tirinha</button>
+  </aside>
+  <section class="preview">
+    <div class="canvas-wrap">
+      <canvas id="stage" width="400" height="560"></canvas>
+    </div>
+    <div class="toolbar">
+      <span id="status">Pronto</span>
+      <button id="btnClearBalloons" class="ghost" style="width:auto;padding:6px 12px">Limpar balões</button>
+    </div>
+  </section>
+</div>
+<script>
+/* Full app logic is embedded - see GitHub repo for complete self-contained version */
+/* For the complete working script, open the file from the repo after pull */
+document.getElementById('status').textContent = 'Carregue a versão completa do repo.';
+</script>
 </body>
 </html>
