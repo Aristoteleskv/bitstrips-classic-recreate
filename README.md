@@ -2,68 +2,77 @@
 
 Recriação fiel do sistema de avatares e tirinhas do **Bitstrips original (2008–2016)**.
 
-## Status atual
+## Status
 
-### Já implementado
+### Implementado
 
-**Arquitetura**
-- Sistema modular de personagens (parts + layers + color slots)
-- Ordem de renderização clássica do Bitstrips
-- Expressões e poses separadas
-- Estrutura completa para Comic Builder
+| Módulo | Descrição |
+|--------|-----------|
+| **ColorSystem** | Slots de cor, paletas de pele/cabelo/roupa, resolveColor |
+| **PoseSystem** | Poses com transformação de membros (waving, thinking, running…) |
+| **SaveFormat** | JSON versionado para avatar e tirinha + localStorage keys |
+| **AssetLibrary** | Peças expandidas (cabelos, roupas, acessórios, expressões) |
+| **AvatarManager / Renderer** | Criação, recolor, render com ordem clássica |
+| **ComicManager / Renderer** | Painéis, balões (fala, pensamento, grito, sussurro) |
+| **ExportComic** | Export PNG multi-painel em alta resolução |
+| **Demo** | Character Builder interativo em `public/index.html` |
 
-**Biblioteca de peças expandida**
-- 5 estilos de cabelo (curto, médio, longo, espetado, cacheado) + frente/trás
-- Vários olhos, sobrancelhas, bocas (neutro, sorriso, grin, triste, surpreso)
-- Tops: T-Shirt, Hoodie, Camisa social, Vestido
-- Bottoms: Calça, Jeans, Saia
-- Acessórios: óculos redondos/retangulares, boné, gorro
-- Shapes SVG melhorados (mais próximos do visual clássico)
+### Docs
 
-**Comic Builder (base)**
-- `ComicManager` – criação de tirinhas, painéis, personagens e balões
-- `ComicRenderer` – renderização de painéis + balões (fala, pensamento, grito, sussurro)
-
-**Demo (`public/index.html`)**
-- Character Builder interativo
-- Troca de gênero, pele, cabelo, roupa, acessórios e expressões
-- Botão Aleatório
-- Exportação PNG e JSON
-- Salvamento local (localStorage)
+- `docs/ASSET_LIBRARY.md` — estrutura de pastas e formato das peças
+- `docs/CHARACTER_BUILDER.md` — wireframe + fluxo de lógica da UI
 
 ## Estrutura
 
 ```
 src/
 ├── types/index.ts
+├── core/
+│   ├── ColorSystem.ts
+│   ├── PoseSystem.ts
+│   └── SaveFormat.ts
 ├── character/
-│   ├── AvatarManager.ts
 │   ├── AssetLibrary.ts
+│   ├── AvatarManager.ts
 │   └── AvatarRenderer.ts
 ├── comic/
 │   ├── ComicManager.ts
-│   └── ComicRenderer.ts
+│   ├── ComicRenderer.ts
+│   └── ExportComic.ts
 └── index.ts
 public/
 └── index.html
+docs/
+├── ASSET_LIBRARY.md
+└── CHARACTER_BUILDER.md
 ```
 
 ## Como rodar
 
 ```bash
+git clone https://github.com/Aristoteleskv/bitstrips-classic-recreate.git
 cd bitstrips-classic-recreate
 npx serve public
 ```
 
-Abra o endereço mostrado no terminal.
+## Formato de save (avatar)
+
+```json
+{
+  "format": "bitstrips-avatar",
+  "version": "1.0.0",
+  "exportedAt": "2026-11-06T01:00:00.000Z",
+  "avatar": { "...": "..." }
+}
+```
 
 ## Próximos passos
 
-- Integrar o ComicRenderer completo na demo (arrastar personagens/balões)
-- Mais peças e props
-- Melhorar ainda mais os paths SVG
-- Sistema de poses com transformação de membros
-- Exportação de tirinha multi-painel em alta resolução
+- Drag & drop de personagens/balões no Comic Builder
+- Carregar peças a partir de JSON em `/assets/parts/`
+- Mais props e cenários
+- Poses com renderização real de membros transformados no canvas
+- UI do Character Builder com grid de thumbnails
 
 ## Princípios
 
