@@ -1,67 +1,54 @@
 # Bitstrips Classic – App Completo
 
-Recriação fiel do **Bitstrips original (2008–2016)** com Character Builder e Comic Builder.
+Recriação do **Bitstrips original (2008–2016)**.
 
-## Como rodar
+## Correr o app (local completo)
+
+Os ficheiros completos estão em:
+
+```
+public/index.html
+public/app-assets.js   # peças + estado
+public/app-render.js   # desenho avatar/tirinha  (✅ no GitHub)
+public/app-ui.js       # controlos + drag + save
+public/app.js          # tudo num só ficheiro (alternativa)
+```
+
+### Opção A — usar o build local completo
 
 ```bash
-git clone https://github.com/Aristoteleskv/bitstrips-classic-recreate.git
 cd bitstrips-classic-recreate
+# copiar os JS completos da pasta de build se ainda não estiverem
 npx serve public
 ```
 
-Abra o URL no browser (ex: `http://localhost:3000`).
+### Opção B — um só app.js
 
-## O que o app faz
+Se tiveres o `app.js` completo:
 
-### Aba Personagem
-- Nome, gênero, tom de pele (paleta)
-- 5 estilos de cabelo + cores
-- Tops (T-Shirt, Hoodie, Camisa, Vestido) + cor
-- Bottoms (Calça, Jeans, Saia)
-- Óculos e chapéu
-- 6 expressões (neutro, feliz, sorriso, triste, surpreso, bravo)
-- Botão Aleatório
-- Salvar / Carregar (localStorage)
-- Exportar PNG
+```html
+<script src="app.js"></script>
+```
 
-### Aba Tirinha
+em vez dos três scripts.
+
+## Funcionalidades
+
+### Personagem
+- Pele, cabelo (5 estilos), roupa, óculos, chapéu
+- 6 expressões
+- Aleatório / Salvar / Carregar / PNG
+
+### Tirinha
 - Até 4 painéis
 - Balões (fala, pensamento, grito, sussurro)
-- **Arrastar balões** no canvas (mouse e touch)
-- Expressão por painel
-- Exportar tirinha PNG em alta resolução (2x)
-- Salvar / Carregar tirinha completa
+- Arrastar balões (rato + touch)
+- Export PNG 2x
 
-## Arquitetura (`src/`)
+## Arquitetura TypeScript (`src/`)
 
-```
-src/
-├── types/
-├── core/
-│   ├── ColorSystem.ts
-│   ├── PoseSystem.ts
-│   └── SaveFormat.ts
-├── character/
-│   ├── AssetLibrary.ts
-│   ├── AvatarManager.ts
-│   └── AvatarRenderer.ts
-└── comic/
-    ├── ComicManager.ts
-    ├── ComicRenderer.ts
-    └── ExportComic.ts
-```
+ColorSystem, PoseSystem, SaveFormat, AvatarManager, ComicManager, ExportComic.
 
-## Formato de save
+## Repo
 
-```json
-{
-  "format": "bitstrips-avatar",
-  "version": "1.0.0",
-  "avatar": { "...": "..." }
-}
-```
-
-## Licença
-
-MIT — projeto de recriação educacional/nostálgica.
+https://github.com/Aristoteleskv/bitstrips-classic-recreate
