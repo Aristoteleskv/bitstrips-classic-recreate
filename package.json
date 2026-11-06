@@ -1,0 +1,13 @@
+{
+  "name": "bitstrips-classic-recreate",
+  "version": "0.1.0",
+  "description": "Faithful recreation of Bitstrips Classic (2008-2016) character and comic system",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve public",
+    "start": "npx serve public"
+  },
+  "keywords": ["bitstrips", "bitmoji", "avatar", "comic", "cartoon"],
+  "author": "Bitstrips Recreate Project",
+  "license": "MIT"
+}
